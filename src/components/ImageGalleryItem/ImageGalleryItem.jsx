@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { Component } from 'react';
 import { Modal } from 'components/Modal/Modal';
 import {
@@ -25,9 +26,22 @@ export class ImageGalleryItem extends Component {
           <GalleryImg src={webformatURL} alt={tags} loading="lazy" />
         </GalleryItem>
         {this.state.isModalOpen && (
-          <Modal link={largeImageURL} alt={tags} onClose={this.closeModal} />
+          <Modal
+            link={largeImageURL}
+            alt={tags || 'big image'}
+            onClose={this.closeModal}
+          />
         )}
       </>
     );
   }
 }
+
+ImageGalleryItem.propTypes = {
+  item: PropTypes.exact({
+    id: PropTypes.number.isRequired,
+    largeImageURL: PropTypes.string.isRequired,
+    webformatURL: PropTypes.string.isRequired,
+    tags: PropTypes.string,
+  }).isRequired,
+};

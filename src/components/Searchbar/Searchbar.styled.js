@@ -30,8 +30,8 @@ export const SearchForm = styled.form`
 
 export const SearchFormBtn = styled.button`
   display: inline-block;
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border: 0;
   background-image: url('https://e7.pngegg.com/pngimages/314/859/png-clipart-computer-icons-magnifying-glass-theme-search-circle-computer-icons.png');
   background-size: 40%;
