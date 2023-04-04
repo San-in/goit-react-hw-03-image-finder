@@ -21,7 +21,7 @@ export class App extends Component {
   };
 
   onSubmitForm = searchedWord => {
-    this.setState({ searchedWord, page: 1 });
+    if (searchedWord.trim()) this.setState({ searchedWord, page: 1 });
   };
   onLoadMore = async () => {
     await this.setState(prevState => {
