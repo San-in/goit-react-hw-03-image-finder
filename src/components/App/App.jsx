@@ -24,55 +24,47 @@ export class App extends Component {
     if (!searchedWord.trim()) {
       return toast.warn('Строка пуста, введіть щось');
     }
-    this.setState({ searchedWord, page: 1 });
+    this.setState({ searchedWord, page: 1, galleryItems: [], totalHits: 0 });
   };
-  onLoadMore = async () => {
-    await this.setState(prevState => {
-      return { page: prevState.page + 1, isLoading: true };
-    });
+  onLoadMore = () => {
+    this.setState(({ page }) => ({
+      page: page + 1,
+    }));
+  };
 
-    const { searchedWord, page } = this.state;
-    await getPicturesByQuery(searchedWord, page)
-      .then(({ galleryItems }) =>
-        this.setState(prevState => {
-          return {
-            galleryItems: [...prevState.galleryItems, ...galleryItems],
-          };
-        })
-      )
-      .catch(({ message }) => toast.error(message))
-      .finally(() => {
-        Scroll.animateScroll.scrollMore(620);
-        this.setState({ isLoading: false });
-      });
-  };
   componentDidUpdate(prevProps, prevState) {
     const { searchedWord, page } = this.state;
 
-    if (prevState.searchedWord !== searchedWord) {
-      this.setState({ isLoading: true, totalHits: 0, galleryItems: [] });
-      try {
-        getPicturesByQuery(searchedWord, page)
-          .then(({ totalHits, galleryItems }) =>
-            this.setState({ totalHits, galleryItems })
-          )
-          .catch(({ message }) => toast.error(message))
-          .finally(() => this.setState({ isLoading: false }));
-      } catch {
-        toast.warn('Щось з сервером, спробуйте ще');
-      }
+    if (prevState.searchedWord !== searchedWord || prevState.page !== page) {
+      this.setState({ isLoading: true });
+
+      getPicturesByQuery(searchedWord, page)
+        .then(({ totalHits, galleryItems }) => {
+          this.setState(prevState => ({
+            totalHits,
+            galleryItems: [...prevState.galleryItems, ...galleryItems],
+          }));
+          if (page !== 1) {
+            Scroll.animateScroll.scrollMore(620);
+          }
+        })
+        .catch(({ message }) => {
+          console.error(message);
+        })
+        .finally(() => this.setState({ isLoading: false }));
     }
   }
-  isLoadMoreOpen = () => {
-    const { totalHits, page, perPage } = this.state;
-    return totalHits - page * perPage > 0;
-  };
 
   render() {
+    const { searchedWord, galleryItems, isLoading, totalHits } = this.state;
+    const isShowButton = !isLoading && totalHits !== galleryItems.length;
     return (
       <StyledApp>
-        <Searchbar onSubmit={this.onSubmitForm} />
-        {this.state.isLoading && (
+        <Searchbar
+          onSubmit={this.onSubmitForm}
+          searchValueinApp={searchedWord}
+        />
+        {isLoading && (
           <Dna
             height="280"
             width="280"
@@ -84,6 +76,9 @@ export class App extends Component {
             }}
           />
         )}
+
+        {!!galleryItems.length && <ImageGallery galleryItems={galleryItems} />}
+        {isShowButton && <Button onLoadMore={this.onLoadMore} />}
         <ToastContainer
           position="top-right"
           autoClose={1500}
@@ -96,10 +91,6 @@ export class App extends Component {
           pauseOnHover
           theme="light"
         />
-        {this.state.galleryItems && (
-          <ImageGallery galleryItems={this.state.galleryItems} />
-        )}
-        {this.isLoadMoreOpen() && <Button onLoadMore={this.onLoadMore} />}
       </StyledApp>
     );
   }

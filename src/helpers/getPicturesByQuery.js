@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const END_POINT = 'https://pixabay.com/api/';
 const KEY = '18207313-9460c279493d4296cd58108b0';
@@ -13,16 +14,23 @@ export const getPicturesByQuery = (query, page) =>
         per_page: 12,
       },
     })
-    .then(res => {
-      if (res.data.hits.length === 0) {
+    .then(({ data }) => {
+      if (data.hits.length === 0) {
         throw new Error('По вашому запиту нічого не найдено');
       }
       return {
-        totalHits: res.data.totalHits,
-        galleryItems: [...res.data.hits].map(
+        totalHits: data.totalHits,
+        galleryItems: data.hits.map(
           ({ id, largeImageURL, webformatURL, tags }) => {
             return { id, largeImageURL, webformatURL, tags };
           }
         ),
       };
+    })
+    .catch(err => {
+      if (err.isAxiosError) {
+        toast.error('Проблеми з сервером, спробуй пізніше');
+      } else {
+        toast.error(err.message);
+      }
     });

@@ -11,11 +11,11 @@ export class Modal extends Component {
 
   componentDidMount() {
     document.addEventListener('keydown', this.onCloseModal);
-    document.getElementById('html').style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
   }
   componentWillUnmount() {
     document.removeEventListener('keydown', this.onCloseModal);
-    document.getElementById('html').style.overflow = 'auto';
+    document.body.style.overflow = 'auto';
   }
   render() {
     const { link, alt } = this.props;
